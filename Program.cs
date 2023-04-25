@@ -7,6 +7,7 @@ namespace game
 
         static byte language;
         
+        //dictionary for two  languages
         static Dictionary<int, string[]> texts = new Dictionary<int, string[]>()
         {
             { 1, new string[] 
@@ -51,7 +52,8 @@ namespace game
             { 29, new string[] { "\nWrong string, enter from 1 to 10\n", "\nНеверно указана строка, введите от 1 до 10\n"} },
 
         };
-        
+
+        //legit letters for enter coords and letter-to-digit correspondence
         static Dictionary<char, byte> letters = new Dictionary<char, byte>()
         {
             { 'a', 0 },
@@ -66,6 +68,7 @@ namespace game
             { 'j', 9 },
         };
 
+        //escaped characters for my battlefield
         static Dictionary<int, string> symbols = new Dictionary<int, string>()
         {
             { 0, "~" },
@@ -74,6 +77,7 @@ namespace game
             { 3, "O" }
         };
 
+        //escaped characters for enemy battlefield
         static Dictionary<int, string> another_symbols = new Dictionary<int, string>()
         {
             { 0, "~" },
@@ -82,6 +86,7 @@ namespace game
             { 3, "O" }
         };
 
+        //colors for screening
         static Dictionary<string, ConsoleColor> colors = new Dictionary<string, ConsoleColor>()
         {
             { "~", ConsoleColor.Blue },
@@ -217,7 +222,6 @@ namespace game
             me_print_matrix(matrix_2);
         }
 
-
         public static void wait_press_enter ()
         {
             while (true)
@@ -251,6 +255,7 @@ namespace game
             }
         }
 
+        //check matrix and if all ships destroyed return false
         public static bool check_end (int[][] matrix)
         {
             for (int i = 0; i < matrix.Length; i++)
@@ -272,18 +277,19 @@ namespace game
 
         public static int[][] outline_ship_if_destroyed(byte[] coordinats, int[][] matrix)
         {
-            List<int[]> coords = new List<int[]>();
-            int[] c = new int[] { coordinats[0], coordinats[1] };
+            List<int[]> coords = new List<int[]>();  // array for coords around if one-deck ships destroyed
+            int[] int_coord_of_shot = new int[] { coordinats[0], coordinats[1] }; // translating from byte to int to perform arithmetic operations
             // one-deck outline
             int need = 4;
             int have = 0;
             int[][] sides = new int[][] { new int[] {1, 0}, new int[] { -1, 0 }, new int[] { 0, 1 }, new int[] { 0, -1 }, };
 
+            // check one-deck or not
             foreach (int[] side in sides)
             {
                 try
                 {
-                    if (matrix[c[0] + side[0]][c[1] + side[1]] == 1)
+                    if (matrix[int_coord_of_shot[0] + side[0]][int_coord_of_shot[1] + side[1]] == 1)
                         return matrix;
                 }
                 catch { continue; }
@@ -293,23 +299,26 @@ namespace game
             {
                 try
                 {
-                    if (matrix[c[0] + side[0]][c[1] + side[1]] != 2)
+                    if (matrix[int_coord_of_shot[0] + side[0]][int_coord_of_shot[1] + side[1]] != 2)
                         have++;
                 }
                 catch { need--; }
             }
 
+            // if one-desk
             if (have == need)
             {
-                coords.Add(new int[] { c[0] - 1, c[1] - 1});
-                coords.Add(new int[] { c[0] - 1, c[1] });
-                coords.Add(new int[] { c[0] - 1, c[1] + 1 });
-                coords.Add(new int[] { c[0], c[1] - 1 });
-                coords.Add(new int[] { c[0], c[1] + 1 });
-                coords.Add(new int[] { c[0] + 1, c[1] - 1 });
-                coords.Add(new int[] { c[0] + 1, c[1]});
-                coords.Add(new int[] { c[0] + 1, c[1] + 1 });
+                // add coords around one-deck ship
+                coords.Add(new int[] { int_coord_of_shot[0] - 1, int_coord_of_shot[1] - 1});
+                coords.Add(new int[] { int_coord_of_shot[0] - 1, int_coord_of_shot[1] });
+                coords.Add(new int[] { int_coord_of_shot[0] - 1, int_coord_of_shot[1] + 1 });
+                coords.Add(new int[] { int_coord_of_shot[0], int_coord_of_shot[1] - 1 });
+                coords.Add(new int[] { int_coord_of_shot[0], int_coord_of_shot[1] + 1 });
+                coords.Add(new int[] { int_coord_of_shot[0] + 1, int_coord_of_shot[1] - 1 });
+                coords.Add(new int[] { int_coord_of_shot[0] + 1, int_coord_of_shot[1]});
+                coords.Add(new int[] { int_coord_of_shot[0] + 1, int_coord_of_shot[1] + 1 });
 
+                // fill around one-deck ship
                 foreach (int[] ar in coords)
                 {
                     try
@@ -326,28 +335,29 @@ namespace game
 
             // two-three-four-deck outline
 
+            // chech what vector have ship, 1-vertical or 2-horizontal
             int vec = 0;
             try
             {
-                if (matrix[c[0] + 1][c[1]] == 2)
+                if (matrix[int_coord_of_shot[0] + 1][int_coord_of_shot[1]] == 2)
                     vec = 1;
             }
             catch { }
             try
             {
-                if (matrix[c[0] - 1][c[1]] == 2)
+                if (matrix[int_coord_of_shot[0] - 1][int_coord_of_shot[1]] == 2)
                     vec = 1;
             }
             catch { }
             try
             {
-                if (matrix[c[0]][c[1] + 1] == 2)
+                if (matrix[int_coord_of_shot[0]][int_coord_of_shot[1] + 1] == 2)
                     vec = 2;
             }
             catch { }
             try
             {
-                if (matrix[c[0]][c[1] - 1] == 2)
+                if (matrix[int_coord_of_shot[0]][int_coord_of_shot[1] - 1] == 2)
                     vec = 2;
             }
             catch { }
@@ -356,57 +366,59 @@ namespace game
             // try outline verical ships
             if (vec == 1)
             {
-                int min = c[0];
-                int max = c[0];
-                for (int i = 1; i < 4; i++)
-                {
-                    try
-                    {
-                        if (matrix[c[0] + i][c[1]] == 2)
-                        {
-                            max = c[0] + i;
-                        }
-                        if (matrix[c[0] + i][c[1]] == 1)
-                            return matrix;
-                        if (matrix[c[0] + i][c[1]] == 0 || matrix[c[0] + i][c[1]] == 3)
-                            break;
-                    }
-                    catch { }
-                }
-                for (int i = 1; i < 4; i++)
-                {
-                    try
-                    {
-                        if (matrix[c[0] - i][c[1]] == 2)
-                        {
-                            min = c[0] - i;
-                        }
-                        if (matrix[c[0] - i][c[1]] == 1)
-                            return matrix;
-                        if (matrix[c[0] - i][c[1]] == 0 || matrix[c[0] - i][c[1]] == 3)
-                            break;
-                    }
-                    catch { }
-                }
+                int min = int_coord_of_shot[0]; // for the upmost coord 
+                int max = int_coord_of_shot[0]; // for the downmost coord
 
+                // determine the length of the ship (down and up)
+                for (int i = 1; i < 4; i++)
+                {
+                    try
+                    {
+                        if (matrix[int_coord_of_shot[0] + i][int_coord_of_shot[1]] == 2)
+                        {
+                            max = int_coord_of_shot[0] + i;
+                        }
+                        if (matrix[int_coord_of_shot[0] + i][int_coord_of_shot[1]] == 1)
+                            return matrix;
+                        if (matrix[int_coord_of_shot[0] + i][int_coord_of_shot[1]] == 0 || matrix[int_coord_of_shot[0] + i][int_coord_of_shot[1]] == 3)
+                            break;
+                    }
+                    catch { }
+                }
+                for (int i = 1; i < 4; i++)
+                {
+                    try
+                    {
+                        if (matrix[int_coord_of_shot[0] - i][int_coord_of_shot[1]] == 2)
+                        {
+                            min = int_coord_of_shot[0] - i;
+                        }
+                        if (matrix[int_coord_of_shot[0] - i][int_coord_of_shot[1]] == 1)
+                            return matrix;
+                        if (matrix[int_coord_of_shot[0] - i][int_coord_of_shot[1]] == 0 || matrix[int_coord_of_shot[0] - i][int_coord_of_shot[1]] == 3)
+                            break;
+                    }
+                    catch { }
+                }
+                // fill coords, that we get upper
                 try
                 {
-                    matrix[min - 1][c[1]] = 3;
+                    matrix[min - 1][int_coord_of_shot[1]] = 3;
                 } catch { }
                 try
                 {
-                    matrix[max + 1][c[1]] = 3;
+                    matrix[max + 1][int_coord_of_shot[1]] = 3;
                 } catch { }
                 for (int i = min-1; i <= max+1; i++)
                 {
                     try
                     {
-                        matrix[i][c[1] - 1] = 3;
+                        matrix[i][int_coord_of_shot[1] - 1] = 3;
                     }
                     catch { }
                     try
                     {
-                        matrix[i][c[1] + 1] = 3;
+                        matrix[i][int_coord_of_shot[1] + 1] = 3;
                     }
                     catch { }
                 }
@@ -414,19 +426,20 @@ namespace game
             // try outline horizontal ships
             else
             {
-                int min = c[1];
-                int max = c[1];
+                int min = int_coord_of_shot[1]; // for the leftmost coord
+                int max = int_coord_of_shot[1]; // for the rightmost coord
+                // get left and right coord
                 for (int i = 1; i < 4; i++)
                 {
                     try
                     {
-                        if (matrix[c[0]][c[1] + i] == 2)
+                        if (matrix[int_coord_of_shot[0]][int_coord_of_shot[1] + i] == 2)
                         {
-                            max = c[1] + i;
+                            max = int_coord_of_shot[1] + i;
                         }
-                        if (matrix[c[0]][c[1] + i] == 1)
+                        if (matrix[int_coord_of_shot[0]][int_coord_of_shot[1] + i] == 1)
                             return matrix;
-                        if (matrix[c[0]][c[1] + i] == 0 || matrix[c[0]][c[1] + i] == 3)
+                        if (matrix[int_coord_of_shot[0]][int_coord_of_shot[1] + i] == 0 || matrix[int_coord_of_shot[0]][int_coord_of_shot[1] + i] == 3)
                             break;
                     }
                     catch { }
@@ -435,43 +448,44 @@ namespace game
                 {
                     try
                     {
-                        if (matrix[c[0]][c[1] - i] == 2)
+                        if (matrix[int_coord_of_shot[0]][int_coord_of_shot[1] - i] == 2)
                         {
-                            min = c[1] - i;
+                            min = int_coord_of_shot[1] - i;
                         }
-                        if (matrix[c[0]][c[1] - i] == 1)
+                        if (matrix[int_coord_of_shot[0]][int_coord_of_shot[1] - i] == 1)
                             return matrix;
-                        if (matrix[c[0]][c[1] - i] == 0 || matrix[c[0]][c[1] - i] == 3)
+                        if (matrix[int_coord_of_shot[0]][int_coord_of_shot[1] - i] == 0 || matrix[int_coord_of_shot[0]][int_coord_of_shot[1] - i] == 3)
                             break;
                     }
                     catch { }
                 }
-
+                
+                // fiil coords, that we get upper
                 try
                 {
-                    matrix[c[0]][min-1] = 3;
+                    matrix[int_coord_of_shot[0]][min-1] = 3;
                 }
                 catch { }
                 try
                 {
-                    matrix[c[0]][max + 1] = 3;
+                    matrix[int_coord_of_shot[0]][max + 1] = 3;
                 }
                 catch { }
                 for (int i = min - 1; i <= max + 1; i++)
                 {
                     try
                     {
-                        matrix[c[0] - 1][i] = 3;
+                        matrix[int_coord_of_shot[0] - 1][i] = 3;
                     }
                     catch { }
                     try
                     {
-                        matrix[c[0] + 1][i] = 3;
+                        matrix[int_coord_of_shot[0] + 1][i] = 3;
                     }
                     catch { }
                 }
             }
-
+            // return matrix with fill around ship
             return matrix;
         }
 
@@ -480,6 +494,7 @@ namespace game
 
         public static int[][] create_matrix ()
         {
+            // create clear matrix 10x10
             int[][] matrix = new int[10][];
             for (int i = 0; i < matrix.Length; i++)
             {
@@ -487,7 +502,7 @@ namespace game
             }
             byte vector;
             byte[] coords;
-            List<int[]> coords_for_check = new List<int[]>();
+            List<int[]> coords_for_check = new List<int[]>(); // list for coords for transfer in method, where check can we put ship there or not 
 
             me_print_matrix(matrix);
 
@@ -495,28 +510,34 @@ namespace game
             Console.WriteLine(texts[4][language]);
             while (true)
             {
-                vector = get_vector();
+                vector = get_vector(); 
                 coords = get_coord();
+                // if vector = 1 (vertical)
                 if (vector == 1)
                 {
+                    // check on legit string coord
                     if (coords[0] == 7 || coords[0] == 8 || coords[0] == 9)
                     {
                         Console.WriteLine(texts[5][language]);
                         continue;
                     }
+                    // if coord is normal - put ship in battlefield
                     for (int i = 0; i < 4; i++)
                     {
                         matrix[coords[0] + i][coords[1]] = 1;
                     }
                     break;
                 }
+                // if vector = 2 (horizontal)
                 else if (vector == 2)
                 {
+                    // check on legit column coord
                     if (coords[1] == 7 || coords[1] == 8 || coords[1] == 9)
                     {
                         Console.WriteLine(texts[5][language]);
                         continue;
                     }
+                    // if coord is normal - put ship in battlefield
                     for (int i = 0; i < 4; i++)
                     {
                         matrix[coords[0]][coords[1]+i] = 1;
@@ -538,22 +559,24 @@ namespace game
                     coords = get_coord();
                     if (vector == 1)
                     {
+                        // check on legit string coord
                         if (coords[0] == 8 || coords[0] == 9)
                         {
                             Console.WriteLine(texts[12][language]);
                             continue;
                         }
-
+                        // if coord is normal take all coords where will ship
                         for (int i = -1; i < 4; i++)
                         {
                             coords_for_check.Add(new int[] { coords[0] + i, coords[1] });
                         }
-
+                        // check can we put ship on place with choosed player or not
                         if (!check_create_ship(vector, coords_for_check, matrix))
                         {
                             Console.WriteLine(texts[12][language]);
                             continue;
                         }
+                        // if can
                         for (int i = 0; i < 3; i++)
                         {
                             matrix[coords[0] + i][coords[1]] = 1;
@@ -562,23 +585,24 @@ namespace game
                     }
                     else if (vector == 2)
                     {
+                        // check on legit column coord
                         if (coords[1] == 8 || coords[1] == 9)
                         {
                             Console.WriteLine(texts[12][language]);
                             continue;
                         }
-
+                        // if coord is normal take all coords where will ship
                         for (int i = -1; i < 4; i++)
                         {
                             coords_for_check.Add(new int[] { coords[0], coords[1] + i });
                         }
-
+                        // check can we put ship on place with choosed player or not
                         if (!check_create_ship(vector, coords_for_check, matrix))
                         {
                             Console.WriteLine(texts[12][language]);
                             continue;
                         }
-
+                        // if can
                         for (int i = 0; i < 3; i++)
                         {
                             matrix[coords[0]][coords[1] + i] = 1;
@@ -687,6 +711,7 @@ namespace game
         public static bool check_create_ship (byte vec, List<int[]> coords, int[][] matrix)
         {
             int ln = coords.Count;
+            // take coords where will ship, and around ship too
             if (vec == 1)
             {
                 for (int i = 0; i < ln; i++)
@@ -703,6 +728,7 @@ namespace game
                     coords.Add(new int[] { coords[i][0] + 1, coords[i][1] });
                 }
             }
+            // check on another ship around ship
             for (int i = 0; i < coords.Count; i++)
             {
                 try
